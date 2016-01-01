@@ -170,6 +170,85 @@ BUGFIXES:
   ZOOKEEPER-2269: NullPointerException in RemotePeerBean
   (Arshad Mohammad via rgs)
 
+  ZOOKEEPER-2279: QuorumPeer loadDataBase() error message is incorrect
+  (Arshad Mohammad via rakeshr)
+
+  ZOOKEEPER-1803: Add description for pzxid in programmer's guide
+  (Arshad Mohammad via rakeshr)
+
+  ZOOKEEPER-2253: C asserts ordering of ping requests, while Java client does not
+  (Chris Chen via rgs)
+
+  ZOOKEEPER-2244: On Windows zookeeper fails to restart (Arshad Mohammad via rakeshr)
+
+  ZOOKEEPER-2268: Zookeeper doc creation fails on windows
+  (Arshad Mohammad via cnauroth)
+
+  ZOOKEEPER-2281: ZK Server startup fails if there are spaces in the JAVA_HOME
+  path (Neha Bathra via cnauroth)
+
+  ZOOKEEPER-1460: IPv6 literal address not supported for quorum members
+  (Joseph Walton via cnauroth)
+
+  ZOOKEEPER-2302: Some test cases are not running because wrongly named
+  (Arshad Mohammad via fpj)
+
+  ZOOKEEPER-2142: JMX ObjectName is incorrect for observers (Edward Ribeiro
+  via michim)
+
+  ZOOKEEPER-1872: QuorumPeer is not shutdown in few cases
+  (Rakesh R. via rgs)
+
+  ZOOKEEPER-2211: PurgeTxnLog does not correctly purge when snapshots and
+  logs are at different locations (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2227: stmk four-letter word fails execution at server while reading
+  trace mask argument (Chris Nauroth via rgs)
+
+  ZOOKEEPER-1853: zkCli.sh can't issue a CREATE command containing spaces in
+  the data (Ryan Lamore via rgs)
+
+  ZOOKEEPER-2229: Several four-letter words are undocumented
+  (Chris Nauroth via rgs)
+
+  ZOOKEEPER-1929: std::length_error on update children
+  (Charles Strahan via rgs)
+
+  ZOOKEEPER-1371: Remove dependency on log4j in the source code
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2329: Clear javac and javadoc warning from zookeeper
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2330: ZooKeeper close API does not close Login thread
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2311: assert in setup_random
+  (Marshall McMullen via rgs)
+
+  ZOOKEEPER-2304: JMX ClientPort from ZooKeeperServerBean incorrect
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2301: QuorumPeer does not listen on passed client IP in the constructor
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2299: NullPointerException in LocalPeerBean for ClientAddress
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2295: TGT refresh time logic is wrong
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2340: JMX is disabled even if JMXDISABLE is false
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2252: Random test case failure in
+  org.apache.zookeeper.test.StaticHostProviderTest (Timothy Ward via cnauroth)
+
+  ZOOKEEPER-1029: C client bug in zookeeper_init (if bad hostname is given)
+  (fpj via cnauroth)
+
+  ZOOKEEPER-412: checkstyle target fails trunk build (Akihiro Suda via cnauroth)
+
 IMPROVEMENTS:
   ZOOKEEPER-1660 Documentation for Dynamic Reconfiguration (Reed Wanderman-Milne via shralex)  
 
@@ -258,6 +337,24 @@ IMPROVEMENTS:
 
   ZOOKEEPER-2040: Server to log underlying cause of SASL connection problems.
   (Steve Loughran via cnauroth)
+
+  ZOOKEEPER-2315: Change client connect zk service timeout log level from Info
+  to Warn level (Lin Yiqun via rgs)
+
+  ZOOKEEPER-2240: Make the three-node minimum more explicit in documentation
+  and on website (Shawn Heisey via rgs)
+
+  ZOOKEEPER-2326: Include connected server address:port in log
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2335: Java Compilation Error in ClientCnxn.java
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2306: Remove file delete duplicate code from test code
+  (Arshad Mohammad via rgs)
+
+  ZOOKEEPER-2300: Expose SecureClientPort and SecureClientAddress JMX properties
+  (Arshad Mohammad via rgs)
 
 Release 3.5.0 - 8/4/2014
 

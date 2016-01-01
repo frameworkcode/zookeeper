@@ -173,17 +173,38 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                type = LearnerType.PARTICIPANT;
             } else {
                throw new ConfigException("Unrecognised peertype: " + s);
-            }   
-        }       
+            }
+        }
 
-        private static final String wrongFormat = " does not have the form server_cofig or server_config;client_config"+
+        private static String[] splitWithLeadingHostname(String s)
+                throws ConfigException
+        {
+            /* Does it start with an IPv6 literal? */
+            if (s.startsWith("[")) {
+                int i = s.indexOf("]:");
+                if (i < 0) {
+                    throw new ConfigException(s + " starts with '[' but has no matching ']:'");
+                }
+
+                String[] sa = s.substring(i + 2).split(":");
+                String[] nsa = new String[sa.length + 1];
+                nsa[0] = s.substring(1, i);
+                System.arraycopy(sa, 0, nsa, 1, sa.length);
+
+                return nsa;
+            } else {
+                return s.split(":");
+            }
+        }
+
+        private static final String wrongFormat = " does not have the form server_config or server_config;client_config"+
         " where server_config is host:port:port or host:port:port:type and client_config is port or host:port";
-        
+
         public QuorumServer(long sid, String addressStr) throws ConfigException {
             // LOG.warn("sid = " + sid + " addressStr = " + addressStr);
             this.id = sid;
             String serverClientParts[] = addressStr.split(";");
-            String serverParts[] = serverClientParts[0].split(":");
+            String serverParts[] = splitWithLeadingHostname(serverClientParts[0]);
             if ((serverClientParts.length > 2) || (serverParts.length < 3)
                     || (serverParts.length > 4)) {
                 throw new ConfigException(addressStr + wrongFormat);
@@ -191,7 +212,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
             if (serverClientParts.length == 2) {
                 //LOG.warn("ClientParts: " + serverClientParts[1]);
-                String clientParts[] = serverClientParts[1].split(":");
+                String clientParts[] = splitWithLeadingHostname(serverClientParts[1]);
                 if (clientParts.length > 2) {
                     throw new ConfigException(addressStr + wrongFormat);
                 }
@@ -252,11 +273,21 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             this.myAddrs = excludedSpecialAddresses(this.myAddrs);
         }
 
+        private static String delimitedHostString(InetSocketAddress addr)
+        {
+            String host = addr.getHostString();
+            if (host.contains(":")) {
+                return "[" + host + "]";
+            } else {
+                return host;
+            }
+        }
+
         public String toString(){
-            StringWriter sw = new StringWriter();            
+            StringWriter sw = new StringWriter();
             //addr should never be null, but just to make sure
-            if (addr !=null) { 
-                sw.append(addr.getHostString());
+            if (addr !=null) {
+                sw.append(delimitedHostString(addr));
                 sw.append(":");
                 sw.append(String.valueOf(addr.getPort()));
             }
@@ -268,7 +299,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             else if (type == LearnerType.PARTICIPANT) sw.append(":participant");            
             if (clientAddr!=null){
                 sw.append(";");
-                sw.append(clientAddr.getHostString());
+                sw.append(delimitedHostString(clientAddr));
                 sw.append(":");
                 sw.append(String.valueOf(clientAddr.getPort()));
             }
@@ -762,7 +793,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             	writeLongToFile(ACCEPTED_EPOCH_FILENAME, acceptedEpoch);
             }
             if (acceptedEpoch < currentEpoch) {
-                throw new IOException("The current epoch, " + ZxidUtils.zxidToString(currentEpoch) + " is less than the accepted epoch, " + ZxidUtils.zxidToString(acceptedEpoch));
+                throw new IOException("The accepted epoch, " + ZxidUtils.zxidToString(acceptedEpoch) + " is less than the current epoch, " + ZxidUtils.zxidToString(currentEpoch));
             }
         } catch(IOException ie) {
             LOG.error("Unable to load database on disk", ie);
@@ -827,9 +858,8 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             long myid, int tickTime, int initLimit, int syncLimit)
         throws IOException
     {
-        this(quorumPeers, snapDir, logDir, electionAlg,
-                myid,tickTime, initLimit,syncLimit, false,
-                ServerCnxnFactory.createFactory(new InetSocketAddress(clientPort), -1),
+        this(quorumPeers, snapDir, logDir, electionAlg, myid, tickTime, initLimit, syncLimit, false,
+                ServerCnxnFactory.createFactory(getClientAddress(quorumPeers, myid, clientPort), -1),
                 new QuorumMaj(quorumPeers));
     }
 
@@ -845,8 +875,24 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     {
         this(quorumPeers, snapDir, logDir, electionAlg,
                 myid,tickTime, initLimit,syncLimit, false,
-                ServerCnxnFactory.createFactory(new InetSocketAddress(clientPort), -1),
+                ServerCnxnFactory.createFactory(getClientAddress(quorumPeers, myid, clientPort), -1),
                 quorumConfig);
+    }
+
+    private static InetSocketAddress getClientAddress(Map<Long, QuorumServer> quorumPeers, long myid, int clientPort)
+            throws IOException {
+        QuorumServer quorumServer = quorumPeers.get(myid);
+        if (null == quorumServer) {
+            throw new IOException("No QuorumServer correspoding to myid " + myid);
+        }
+        if (null == quorumServer.clientAddr) {
+            return new InetSocketAddress(clientPort);
+        }
+        if (quorumServer.clientAddr.getPort() != clientPort) {
+            throw new IOException("QuorumServer port " + quorumServer.clientAddr.getPort()
+                    + " does not match with given port " + clientPort);
+        }
+        return quorumServer.clientAddr;
     }
 
     /**
